@@ -1,0 +1,197 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.bloducspauter</groupId>
+    <artifactId>ip_test</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>ip_test_intercept</module>
+        <module>ip_test_base</module>
+        <module>ip_test_CRD</module>
+    </modules>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.16</version>
+    </parent>
+    <properties>
+        <java.version>11</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>11</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <mybatis.plus.boot.starter.version>3.4.2</mybatis.plus.boot.starter.version>
+        <spring.boot.starter.data.redis>2.7.16</spring.boot.starter.data.redis>
+        <spring.session.data.redis>2.7.2</spring.session.data.redis>
+        <com.alibaba.cloud>2021.0.5.0</com.alibaba.cloud>
+        <org.springframework.cloud>3.1.6</org.springframework.cloud>
+        <com.fasterxml.jackson.core>2.12.5</com.fasterxml.jackson.core>
+        <com.alibaba>1.2.76</com.alibaba>
+        <com.alibaba.druid>1.2.16</com.alibaba.druid>
+        <com.baomidou>3.4.2</com.baomidou>
+        <com.alibaba.csp>1.8.6</com.alibaba.csp>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <!--        nacos注册发现-->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+                <version>${com.alibaba.cloud}</version>
+            </dependency>
+            <!--        nacos注册发现-->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+                <version>${com.alibaba.cloud}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${com.alibaba}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${com.baomidou}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-core</artifactId>
+                <version>${com.baomidou}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-annotation</artifactId>
+                <version>${com.baomidou}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${com.fasterxml.jackson.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${com.fasterxml.jackson.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${com.fasterxml.jackson.core}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+            </dependency>
+            <!--  springCloud-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter</artifactId>
+                <version>${org.springframework.cloud}</version>
+            </dependency>
+            <!--        负载均衡-->
+            <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-loadbalancer -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+                <version>${org.springframework.cloud}</version>
+            </dependency>
+            <!--        开启对bootStrap.yml的支持-->
+            <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-bootstrap -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-bootstrap</artifactId>
+                <version>${org.springframework.cloud}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-transport-simple-http</artifactId>
+                <version>${com.alibaba.csp}</version>
+            </dependency>
+            <!--        sentinel依赖-->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+                <version>${com.alibaba.cloud}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.luhuiguo</groupId>
+                <artifactId>fastdfs-client</artifactId>
+                <version>0.4.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.luhuiguo</groupId>
+                <artifactId>fastdfs-spring-boot-starter</artifactId>
+                <version>0.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${com.alibaba.druid}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-openfeign-core</artifactId>
+                <version>${org.springframework.cloud}</version>
+            </dependency>
+            <!--        openfeign服务-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>${org.springframework.cloud}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-core</artifactId>
+                <version>${com.alibaba.csp}</version>
+            </dependency>
+            <!--            getway相关依赖-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-gateway</artifactId>
+                <version>${org.springframework.cloud}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <!--    在最外层的父模块(guli_parent模块)的pom.xml文件最下面加上：-->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <!-- 项目编译打包时将java目录中的*.xml文件进行打包，默认是不进行打包的 -->
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>  <!-- 两个 **  表示多级目录,一个 * 表示只有一级目录-->
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+            <!-- 项目编译打包时将resource目录中的配置文件进行打包，默认是不进行打包的 -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+    </build>
+    <!--    注释：<plugins>中配置的是springboot的maven插件，后面的<executions>在最外层的父模块中定义，具体原因未知。-->
+    <!--    下面的<resources>都是编译打包的时候需要用到，具体原因已经写在注解中。-->
+</project>
+

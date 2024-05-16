@@ -1,6 +1,7 @@
 package com.bloducspauter.base.entities;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.Data;
 @Data
 @TableName(value = "request_entity")
 @AllArgsConstructor
-@ApiModel(value="request_entity",description = "请求的设备基本信息")
+@ApiModel(value="请求的设备基本信息")
 public class FacilityInformation {
     /**
      * 设备ID

@@ -26,7 +26,7 @@ public class Knife4jConfiguration {
                         //描述字段支持Markdown语法
                         .description("# IP Test APIs")
                         .termsOfServiceUrl("https://doc.xiaominfo.com/")
-                        .contact("3230695439@qq.com")
+                        .contact("Bloduc Spauter")
                         .version("1.0")
                         .build())
                 //分组名称

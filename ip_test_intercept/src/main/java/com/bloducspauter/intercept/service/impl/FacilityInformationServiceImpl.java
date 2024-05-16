@@ -28,6 +28,7 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
         int id = requestFacilityInformation.getId();
         log.info("id:{}", id);
         FacilityInformation selectedEntity = findById(id);
+        //判断是否存在，没有作添加否则做更新
         if (selectedEntity != null) {
             log.info("Entity {} is already exists, updating...", requestFacilityInformation.getId());
             int total = selectedEntity.getTotalRequest() + requestFacilityInformation.getTotalRequest();
@@ -81,6 +82,16 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
         queryWrapper.last("limit " + sortParams.getLimit());
         List<FacilityInformation> facilityInformation = requestEntityMapper.selectList(queryWrapper);
         return new SortData<>(sortBy, facilityInformation);
+    }
+
+    @Override
+    public int isBanAnIp(Integer id, Integer status) {
+        FacilityInformation facilityInformation = requestEntityMapper.selectById(id);
+        if (facilityInformation == null) {
+            return 404;
+        }
+        facilityInformation.setStatus(status);
+        return update(facilityInformation);
     }
 
 

@@ -118,7 +118,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 int rejectedRequest = Math.max(totalRequests - 20, 0);
                 String browser = userAgentObj.getBrowser().getName();
                 String operatingSystem = userAgentObj.getOperatingSystem().getName();
-                FacilityInformation requestFacilityInformation = new FacilityInformation(id, operatingSystem, browser, totalRequests, rejectedRequest, address);
+                FacilityInformation requestFacilityInformation = new FacilityInformation(id, operatingSystem, browser, totalRequests, rejectedRequest, address,0);
                 requestEntityService.insert(requestFacilityInformation);
             } catch (Exception e) {
                log.error(e.getLocalizedMessage());

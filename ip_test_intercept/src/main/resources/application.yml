@@ -6,13 +6,15 @@ spring:
     url: jdbc:mysql://192.168.24.128:3230/ip_test
     #It is generally referred to root
     username: root
+
     #Your password
     password: 1234567890
   redis:
+    host: 192.168.24.128
     #spring.redis.database: 0：指定连接Redis时使用的数据库，默认为0。
     database: 0
     #spring.redis.port: 6379：指定Redis服务器的端口号，默认为6379。
-    port: 6379
+    port: 6380
     lettuce:
       pool:
         #spring.redis.lettuce.pool.max-idle: 8：指定连接池中的最大空闲连接数，默认为8。

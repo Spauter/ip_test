@@ -1,6 +1,14 @@
 package com.bloducspauter.intercept.controller;
 
-public class CountRequestController {
+import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 控制层
+ * @author Bloduc Spauter
+ *
+ */
+//@RestController=@Controller+@RequestBody
+@RestController
+public class CountRequestController {
 
 }

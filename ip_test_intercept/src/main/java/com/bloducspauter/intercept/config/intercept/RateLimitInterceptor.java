@@ -30,7 +30,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
     // 同一时间段内允许的最大请求数
-    private static final int MAX_REQUESTS = 4;
+    private static final int MAX_REQUESTS = 120;
     // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
     private static final long TIME_PERIOD = 60 * 1000;
 

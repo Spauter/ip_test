@@ -65,6 +65,6 @@ public interface FacilityInformationService {
      */
     int isBanAnIp(Integer id, Integer status);
 
-    List<FacilityInformation>getForbiddenEntities();
+    List<Object>getForbiddenEntities();
 
 }

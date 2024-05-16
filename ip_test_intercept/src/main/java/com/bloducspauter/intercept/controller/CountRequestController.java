@@ -1,6 +1,5 @@
 package com.bloducspauter.intercept.controller;
 
-
 import com.bloducspauter.base.dto.QueryFacilityInformationParamsDto;
 import com.bloducspauter.base.dto.ResultDto;
 import com.bloducspauter.base.entities.FacilityInformation;

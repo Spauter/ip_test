@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
-
+/**
+ * @author Bloduc Spauter
+ *
+ */
 @Slf4j
 @Service
 public class FacilityInformationServiceImpl implements FacilityInformationService {
@@ -95,11 +98,11 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
     }
 
     @Override
-    public List<FacilityInformation> getForbiddenEntities() {
+    public List<Object> getForbiddenEntities() {
         QueryWrapper<FacilityInformation>facilityInformationQueryWrapper=new QueryWrapper<>();
         facilityInformationQueryWrapper.eq("status",1);
-        return requestEntityMapper.selectList(facilityInformationQueryWrapper);
+        facilityInformationQueryWrapper.select("id");
+        return requestEntityMapper.selectObjs(facilityInformationQueryWrapper);
     }
-
 
 }

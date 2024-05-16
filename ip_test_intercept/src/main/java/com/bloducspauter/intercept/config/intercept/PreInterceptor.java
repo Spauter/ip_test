@@ -1,52 +1,101 @@
 package com.bloducspauter.intercept.config.intercept;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bloducspauter.base.entities.FacilityInformation;
-import com.bloducspauter.base.page.PageParams;
+import com.bloducspauter.base.utils.GetIpUtil;
 import com.bloducspauter.intercept.service.FacilityInformationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
+ * 先前拦截器，在第一位
+ * 用于拦截黑名单
  * @author Bloduc Spauter
  */
 @Component
 @Slf4j
 public class PreInterceptor implements HandlerInterceptor {
+    private boolean isRequested=false;
+    private static final long TIME_PERIOD = 60 * 1000;
+    private final ConcurrentHashMap<Integer, Integer> blacklists = new ConcurrentHashMap<>();
     @Resource
     FacilityInformationService service;
-
     @Resource
     RedisTemplate<String, Object> redisTemplate;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        return true;
+        int id = new GetIpUtil().getId(request);
+        Object storedRedisId = redisTemplate.opsForValue().get(id + "");
+        if (storedRedisId != null) {
+            if (!isRequested) {
+                updateBlacklistRequests(id);
+                isRequested=true;
+            }
+            blacklists.put(id, blacklists.getOrDefault(id, 0) + 1);
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.getWriter().println("403 Forbidden");
+            return false;
+        } else {
+            return true;
+        }
     }
 
+    private void updateBlacklistRequests(int id) {
+        scheduler.schedule(() -> {
+            try {
+                int totalRequests = blacklists.get(id);
+                FacilityInformation facilityInformation=service.findById(id);
+                int originTotalRequests=facilityInformation.getTotalRequest();
+                int originRejectRequests=facilityInformation.getRejectedRequest();
+                facilityInformation.setTotalRequest(totalRequests+originTotalRequests);
+                facilityInformation.setRejectedRequest(totalRequests+originRejectRequests);
+                service.update(facilityInformation);
+            } catch (Exception e) {
+                log.error(e.getLocalizedMessage());
+            }finally {
+                isRequested=false;
+            }
+            //Map中移除
+        }, TIME_PERIOD, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 提前获取被禁止的对象,并加载到redis缓存里面
+     * {@code PostConstruct}在springBoot启动时会执行并且只会执行一次
+     */
     @PostConstruct
-    public void loadForbiddenEntities() {
+    public void loadBlacklistEntities() {
         log.info("starting loading all forbidden entities");
         try {
-            List<FacilityInformation> list = service.getForbiddenEntities();
+            List<Object> list = service.getForbiddenEntities();
             if (list.isEmpty()) {
                 log.warn("Empty forbidden entities");
+                return;
             }
-            redisTemplate.opsForValue().set("forbidden_entities",list);
+            for (Object o : list) {
+                log.info("Adding {} into the blacklist", o.toString());
+                int id = Integer.parseInt(o.toString());
+                blacklists.put(id, 0);
+                redisTemplate.opsForValue().set(o.toString(), o);
+            }
         } catch (Exception e) {
-            log.debug("reason", e.getCause());
-            log.error("loading  forbidden entities failed");
+            log.warn("Exception thread in main:{} {}", e.getClass().getSimpleName(), e.getMessage());
+            log.warn("loading  forbidden entities failed");
         }
     }
 }

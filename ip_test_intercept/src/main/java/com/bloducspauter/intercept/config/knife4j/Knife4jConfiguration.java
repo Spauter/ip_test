@@ -1,4 +1,4 @@
-package com.bloducspauter.intercept.config;
+package com.bloducspauter.intercept.config.knife4j;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

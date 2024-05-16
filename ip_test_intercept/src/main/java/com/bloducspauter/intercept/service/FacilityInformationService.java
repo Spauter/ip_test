@@ -58,6 +58,13 @@ public interface FacilityInformationService {
      */
     SortData<FacilityInformation> sortData(SortParams sortParams);
 
+    /**
+     * @param id
+     * @param status
+     * @return
+     */
     int isBanAnIp(Integer id, Integer status);
+
+    List<FacilityInformation>getForbiddenEntities();
 
 }

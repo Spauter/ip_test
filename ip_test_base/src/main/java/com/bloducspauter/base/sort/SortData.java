@@ -30,5 +30,4 @@ public class SortData<T> {
      */
     @ApiModelProperty("排序结果")
     private List<T> entities;
-
 }

@@ -1,4 +1,4 @@
-package com.bloducspauter.intercept.config;
+package com.bloducspauter.intercept.config.intercept;
 
 import com.bloducspauter.base.entities.FacilityInformation;
 import com.bloducspauter.base.utils.GetIpUtil;
@@ -6,16 +6,11 @@ import com.bloducspauter.intercept.service.FacilityInformationService;
 import eu.bitwalker.useragentutils.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-    private boolean isNew=true;
+    private boolean isNew = true;
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
     // 同一时间段内允许的最大请求数
@@ -62,7 +57,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         //如果当前访问就开始统计
         if (isNew) {
             countAfterIntercept(request, id, ipAddress, userAgentObj);
-            isNew=false;
+            isNew = false;
             return true;
         } else if (requestCounts.get(id) == MAX_REQUESTS) {
             //打印信息
@@ -102,7 +97,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
      * @param address      请求的地址
      * @param userAgentObj 请求的{@code UserAgent}
      */
-    private void countAfterIntercept(HttpServletRequest request, Integer id , String address, UserAgent userAgentObj) {
+    private void countAfterIntercept(HttpServletRequest request, Integer id, String address, UserAgent userAgentObj) {
         // 在指定时间后清除 IP 地址的请求数
         scheduler.schedule(() -> {
             int totalRequests = requestCounts.get(id);
@@ -117,7 +112,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             }
             //Map中移除
             requestCounts.remove(id);
-            isNew=true;
+            isNew = true;
             log.info("Id {} can request again", id);
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);
     }

@@ -94,5 +94,12 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
         return update(facilityInformation);
     }
 
+    @Override
+    public List<FacilityInformation> getForbiddenEntities() {
+        QueryWrapper<FacilityInformation>facilityInformationQueryWrapper=new QueryWrapper<>();
+        facilityInformationQueryWrapper.eq("status",1);
+        return requestEntityMapper.selectList(facilityInformationQueryWrapper);
+    }
+
 
 }

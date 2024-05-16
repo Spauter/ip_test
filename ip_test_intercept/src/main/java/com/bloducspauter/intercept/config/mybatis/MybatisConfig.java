@@ -1,4 +1,4 @@
-package com.bloducspauter.intercept.config;
+package com.bloducspauter.intercept.config.mybatis;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;

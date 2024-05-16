@@ -22,14 +22,6 @@ public class SimpleCORSFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest reqs = (HttpServletRequest) req;
-        String userAgent = reqs.getHeader("User-Agent");
-        UserAgent userAgentObj = UserAgent.parseUserAgentString(userAgent);
-        int id=userAgentObj.getId();
-        HttpSession session=reqs.getSession();
-        Object getId= session.getAttribute(String.valueOf(id));
-        if (getId != null) {
-            return;
-        }
         String curOrigin = reqs.getHeader("Origin");
         HttpServletResponse response = (HttpServletResponse) res;
         response.setHeader("Access-Control-Allow-Origin", curOrigin == null ? "true" : curOrigin);

@@ -31,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
 
+    private boolean isNew=true;
+
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
     // 同一时间段内允许的最大请求数
     private static final int MAX_REQUESTS = 4;
@@ -44,20 +46,37 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     @Resource
     private FacilityInformationService requestEntityService;
 
-    GetIpUtil getIpUtil=new GetIpUtil();
     /**
      * 这个方法将在请求处理之前进行调用。注意：如果该方法的返回值为false ，
      * 将视为当前请求结束，不仅自身的拦截器会失效，还会导致其他的拦截器也不再执行。
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        GetIpUtil getIpUtil = new GetIpUtil();
+        String ipAddress = getIpUtil.getIpAddress(request);
         String userAgent = request.getHeader("User-Agent");
         UserAgent userAgentObj = UserAgent.parseUserAgentString(userAgent);
         int id = userAgentObj.getId();
-        if (!requestCounts.containsKey(id)) {
+        // 更新 IP 地址的请求数
+        requestCounts.put(id, requestCounts.getOrDefault(id, 0) + 1);
+        //如果当前访问就开始统计
+        if (isNew) {
+            countAfterIntercept(request, id, ipAddress, userAgentObj);
+            isNew=false;
             return true;
+        } else if (requestCounts.get(id) == MAX_REQUESTS) {
+            //打印信息
+            log.info("Id:{}, Ip Address:{}, Browser:{} ,Operating_system:{} has many requests",
+                    id, ipAddress, userAgentObj.getBrowser().getName(), userAgentObj.getOperatingSystem().getName());
         }
-       return requestCounts.get(id) >= MAX_REQUESTS;
+        // 检查 IP 地址是否已经达到最大请求数
+        else if (requestCounts.get(id) >= MAX_REQUESTS) {
+            //设置响应状态码
+            response.setStatus(429);
+            response.getWriter().write("Too many requests from this IP address");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -71,47 +90,24 @@ public class RateLimitInterceptor implements HandlerInterceptor {
      * @param handler  请求头
      * @throws Exception 包括{@code IOException}、{@code SQLException}
      */
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
-        GetIpUtil getIpUtil = new GetIpUtil();
-        String ipAddress = getIpUtil.getIpAddress(request);
-        String userAgent = request.getHeader("User-Agent");
-        UserAgent userAgentObj = UserAgent.parseUserAgentString(userAgent);
-        int id = userAgentObj.getId();
-        // 更新 IP 地址的请求数
-        requestCounts.put(id, requestCounts.getOrDefault(id, 0) + 1);
-        //如果当前访问就开始统计
-        if (!requestCounts.contains(id)) {
-            countAfterIntercept(request, id, ipAddress, ipAddress, userAgentObj);
-        }
-        // 检查 IP 地址是否已经达到最大请求数
-        if (requestCounts.containsKey(id) && requestCounts.get(id) >= MAX_REQUESTS) {
-            //存储被拒绝的id
-            HttpSession session = request.getSession();
-            session.setAttribute(String.valueOf(id),id);
-            //打印信息
-            log.info("Id:{}, Ip Address:{}, Browser:{} ,Operating_system:{} has many requests",
-                    id, ipAddress, userAgentObj.getBrowser().getName(), userAgentObj.getOperatingSystem().getName());
-            //设置响应状态码
-            response.setStatus(429);
-            response.getWriter().write("Too many requests from this IP address");
-        }
-    }
+//    @Override
+//    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+//
+//    }
 
     /**
      * 开始统计设备id访问次数，并存入数据库
      *
      * @param id           设备ID
-     * @param ipAddress    IP地址
      * @param address      请求的地址
      * @param userAgentObj 请求的{@code UserAgent}
      */
-    private void countAfterIntercept(HttpServletRequest request, Integer id, String ipAddress, String address, UserAgent userAgentObj) {
+    private void countAfterIntercept(HttpServletRequest request, Integer id , String address, UserAgent userAgentObj) {
         // 在指定时间后清除 IP 地址的请求数
         scheduler.schedule(() -> {
             int totalRequests = requestCounts.get(id);
             try {
-                int rejectedRequest = Math.max(totalRequests - 20, 0);
+                int rejectedRequest = Math.max(totalRequests - MAX_REQUESTS, 0);
                 String browser = userAgentObj.getBrowser().getName();
                 String operatingSystem = userAgentObj.getOperatingSystem().getName();
                 FacilityInformation requestFacilityInformation = new FacilityInformation(id, operatingSystem, browser, totalRequests, rejectedRequest, address, 0);
@@ -121,9 +117,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             }
             //Map中移除
             requestCounts.remove(id);
-            //redis中移除
-            HttpSession session = request.getSession();
-            session.removeAttribute(String.valueOf(id));
+            isNew=true;
             log.info("Id {} can request again", id);
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);
     }

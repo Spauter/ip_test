@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * 请求访问的设备
+ * 请求访问设备基本信息
  *
  * @author Bloduc Spauter
  */

@@ -1,5 +1,9 @@
 package com.bloducspauter.base.enums;
-
+/**
+ * 表示顺序还是倒序
+ * @author Bloduc Spauter
+ *
+ */
 public enum SortWay {
     /**
      * 降序

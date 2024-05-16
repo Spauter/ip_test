@@ -9,8 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * @author Bloduc Spauter
  * 用于解决跨域问题
+ * @author Bloduc Spauter
+ *
  */
 @Component
 public class SimpleCORSFilter implements Filter {
@@ -30,8 +31,6 @@ public class SimpleCORSFilter implements Filter {
 
     }
 
+    @Override
     public void init(FilterConfig filterConfig) {}
-
-    public void destroy() {}
-
 }

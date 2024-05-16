@@ -3,7 +3,7 @@ server:
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.24.128:3230/db_mybatis
+    url: jdbc:mysql://192.168.24.128:3230/ip_test
     #It is generally referred to root
     username: root
     #Your password

@@ -104,7 +104,6 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
         QueryWrapper<FacilityInformation>facilityInformationQueryWrapper=new QueryWrapper<>();
         facilityInformationQueryWrapper.eq("status",1);
         facilityInformationQueryWrapper.select("id");
-        facilityInformationQueryWrapper.select()
         return requestEntityMapper.selectObjs(facilityInformationQueryWrapper);
     }
 

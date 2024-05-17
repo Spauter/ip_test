@@ -16,6 +16,8 @@ public class CountResultDto {
     private Integer totalRequests;
     @ApiModelProperty("总拒绝数量")
     private Integer rejectedRequest;
-
-
+    @ApiModelProperty("总请求Ip数量")
+    private Integer ipAddress;
+    @ApiModelProperty("总设备数量")
+    private Integer totalId;
 }

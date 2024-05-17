@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,19 +23,25 @@ import java.util.concurrent.TimeUnit;
 /**
  * 先前拦截器，在第一位
  * 用于拦截黑名单
+ *
  * @author Bloduc Spauter
  */
 @Component
 @Slf4j
 public class PreInterceptor implements HandlerInterceptor {
-    private boolean isRequested=false;
-    private static final long TIME_PERIOD = 60 * 1000;
-    private final ConcurrentHashMap<Integer, Integer> blacklists = new ConcurrentHashMap<>();
     @Resource
     FacilityInformationService service;
+
     @Resource
     RedisTemplate<String, Object> redisTemplate;
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    private boolean isRequested = false;
+
+    private static final long TIME_PERIOD = 60 * 1000;
+
+    private final Map<Integer, Integer> blacklists = new ConcurrentHashMap<>();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -44,7 +51,7 @@ public class PreInterceptor implements HandlerInterceptor {
         if (storedRedisId != null) {
             if (!isRequested) {
                 updateBlacklistRequests(id);
-                isRequested=true;
+                isRequested = true;
             }
             blacklists.put(id, blacklists.getOrDefault(id, 0) + 1);
             response.setStatus(HttpStatus.FORBIDDEN.value());
@@ -59,16 +66,16 @@ public class PreInterceptor implements HandlerInterceptor {
         scheduler.schedule(() -> {
             try {
                 int totalRequests = blacklists.get(id);
-                FacilityInformation facilityInformation=service.findById(id);
-                int originTotalRequests=facilityInformation.getTotalRequest();
-                int originRejectRequests=facilityInformation.getRejectedRequest();
-                facilityInformation.setTotalRequest(totalRequests+originTotalRequests);
-                facilityInformation.setRejectedRequest(totalRequests+originRejectRequests);
+                FacilityInformation facilityInformation = service.findById(id);
+                int originTotalRequests = facilityInformation.getTotalRequest();
+                int originRejectRequests = facilityInformation.getRejectedRequest();
+                facilityInformation.setTotalRequest(totalRequests + originTotalRequests);
+                facilityInformation.setRejectedRequest(totalRequests + originRejectRequests);
                 service.update(facilityInformation);
             } catch (Exception e) {
                 log.error(e.getLocalizedMessage());
-            }finally {
-                isRequested=false;
+            } finally {
+                isRequested = false;
             }
             //Map中移除
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);

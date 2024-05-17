@@ -6,15 +6,16 @@ import com.bloducspauter.intercept.service.FacilityInformationService;
 import eu.bitwalker.useragentutils.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * 通过拦截器处理{@code HttpServletRequest}里面的请求IP,IP Address,请求的地址进行处理
@@ -34,7 +35,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
     private static final long TIME_PERIOD = 60 * 1000;
 
-    private final ConcurrentHashMap<Integer, Integer> requestCounts = new ConcurrentHashMap<>();
+    private final Map<String, Integer> requestCounts = new ConcurrentSkipListMap<>();
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -53,19 +54,19 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         UserAgent userAgentObj = UserAgent.parseUserAgentString(userAgent);
         int id = userAgentObj.getId();
         // 更新 IP 地址的请求数
-        requestCounts.put(id, requestCounts.getOrDefault(id, 0) + 1);
+        requestCounts.put(ipAddress, requestCounts.getOrDefault(ipAddress, 0) + 1);
         //如果当前访问就开始统计
         if (isNew) {
             countAfterIntercept(request, id, ipAddress, userAgentObj);
             isNew = false;
             return true;
-        } else if (requestCounts.get(id) == MAX_REQUESTS) {
+        } else if (requestCounts.get(ipAddress) == MAX_REQUESTS) {
             //打印信息
             log.info("Id:{}, Ip Address:{}, Browser:{} ,Operating_system:{} has many requests",
                     id, ipAddress, userAgentObj.getBrowser().getName(), userAgentObj.getOperatingSystem().getName());
         }
         // 检查 IP 地址是否已经达到最大请求数
-        else if (requestCounts.get(id) >= MAX_REQUESTS) {
+        else if (requestCounts.get(ipAddress) >= MAX_REQUESTS) {
             //设置响应状态码
             response.setStatus(429);
             response.getWriter().write("Too many requests from this IP address");
@@ -100,7 +101,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private void countAfterIntercept(HttpServletRequest request, Integer id, String address, UserAgent userAgentObj) {
         // 在指定时间后清除 IP 地址的请求数
         scheduler.schedule(() -> {
-            int totalRequests = requestCounts.get(id);
+            int totalRequests = requestCounts.get(address);
             try {
                 int rejectedRequest = Math.max(totalRequests - MAX_REQUESTS, 0);
                 String browser = userAgentObj.getBrowser().getName();
@@ -111,9 +112,22 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 log.error(e.getLocalizedMessage());
             }
             //Map中移除
-            requestCounts.remove(id);
+            requestCounts.remove(address);
             isNew = true;
-            log.info("Id {} can request again", id);
+            log.info("address {} can request again", address);
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);
+    }
+
+    @PostConstruct
+    private void countCurrentForbiddenIps(){
+        log.info("starting quartz for current...");
+        getCountCurrentForbiddenIps();
+    }
+
+    @Scheduled(cron = "15/5 * * * * ?")
+    private void getCountCurrentForbiddenIps(){
+        int total=requestCounts.size();
+
+
     }
 }

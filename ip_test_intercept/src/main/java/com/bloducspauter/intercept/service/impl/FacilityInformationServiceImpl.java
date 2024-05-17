@@ -1,10 +1,12 @@
 package com.bloducspauter.intercept.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bloducspauter.base.page.PageData;
 import com.bloducspauter.base.page.PageParams;
 import com.bloducspauter.base.entities.FacilityInformation;
+import com.bloducspauter.base.po.TotalRejectedPo;
 import com.bloducspauter.base.sort.SortData;
 import com.bloducspauter.base.sort.SortParams;
 import com.bloducspauter.intercept.mapper.FacilityInformationMapper;
@@ -102,6 +104,7 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
         QueryWrapper<FacilityInformation>facilityInformationQueryWrapper=new QueryWrapper<>();
         facilityInformationQueryWrapper.eq("status",1);
         facilityInformationQueryWrapper.select("id");
+        facilityInformationQueryWrapper.select()
         return requestEntityMapper.selectObjs(facilityInformationQueryWrapper);
     }
 

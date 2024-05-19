@@ -22,8 +22,8 @@ public class SortParams {
     /**
      * 顺序还是倒序,使用{@link SortWay}
      */
-    @ApiModelProperty("顺序还是倒序")
-    private boolean sort;
+    @ApiModelProperty("顺序还是倒序，ASC或者DESC")
+    private String sort;
     /**
      * 选择排序的数量限制
      */

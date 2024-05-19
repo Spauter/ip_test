@@ -9,12 +9,13 @@ import lombok.Setter;
  *
  */
 @Setter
-@ApiModel("X轴相关简单设置")
+@ApiModel(description = "X轴相关简单设置",value = "xAxis")
 public class XAxis {
     public static final String TYPE ="category";
-    public static final String NAME="时间";
+    @ApiModelProperty("X轴数据单位,默认为时间")
+    private  String name="时间";
     @ApiModelProperty("X轴数据")
     private Object[] data;
-    @ApiModelProperty("是否显示格子")
+    @ApiModelProperty("是否显示网格")
     private boolean showLine;
 }

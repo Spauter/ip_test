@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * @author Bloduc Spauter
  */
@@ -14,7 +16,7 @@ public class XAxis {
     @ApiModelProperty("X轴数据单位,默认为时间")
     private String name = "时间";
     @ApiModelProperty("X轴数据")
-    private Object[] data;
+    private List<Object> data;
     @ApiModelProperty("是否显示网格")
-    private boolean showLine;
+    private boolean showLine=false;
 }

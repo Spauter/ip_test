@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * @author Bloduc Spauter
  */
@@ -13,7 +15,7 @@ public class YAxis {
     @ApiModelProperty("默认为值")
     private String type = "value";
     @ApiModelProperty("X轴数据")
-    private Object[] data;
+    private List<Object> data;
     @ApiModelProperty("是否显示网格")
-    private boolean showLine;
+    private boolean showLine=false;
 }

@@ -2,6 +2,8 @@ package com.bloducspauter.intercept.controller;
 
 import com.bloducspauter.base.dto.echarts.Legend;
 import com.bloducspauter.base.dto.echarts.Option;
+import com.bloducspauter.base.dto.echarts.XAxis;
+import com.bloducspauter.base.dto.echarts.YAxis;
 import com.bloducspauter.base.po.CountResultPo;
 import com.bloducspauter.intercept.service.FacilityInformationCurrentRequestService;
 import io.swagger.annotations.Api;
@@ -39,9 +41,16 @@ public class CountCurrentController {
     @ApiOperation("获取折线图数据")
     @GetMapping("/current_count")
     public Option getOption() {
+        //此处写死了
+        int start=60;
+        int end=0;
+        int interval=5;
         Option option=new Option();
-        option.setLegend(new Legend());
-
+        Legend legend=new Legend();
+        option.setLegend(legend);
+        XAxis xAxis=new XAxis();
+        YAxis yAxis=new YAxis();
         return option;
+
     }
 }

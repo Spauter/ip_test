@@ -38,15 +38,17 @@ public class FacilityInformationCurrentRequestServiceImpl
     }
 
     @Override
-    public CountResultPo countCurrent(int s) {
+    public CountResultPo countCurrent(int start,int end) {
         QueryWrapper<FacilityInformationCurrentRequest>queryWrapper=new QueryWrapper<>();
         queryWrapper.select("SUM(total) as total",
                 "SUM(reject) as rejected",
                 "COUNT(DISTINCT ip) as ips",
                 "COUNT(DISTINCT id) as ids"
                 );
-        LocalDateTime thirtySecondsAgo = LocalDateTime.now().minusSeconds(s);
+        LocalDateTime thirtySecondsAgo = LocalDateTime.now().minusSeconds(start);
+        LocalDateTime thirtySecondNear = LocalDateTime.now().minusSeconds(end);
         queryWrapper.lt("update_time", thirtySecondsAgo);
+        queryWrapper.ge("update_time",thirtySecondNear);
         Map<String, Object> stats = facilityInformationCurrentRequestMapper.selectMaps(queryWrapper).get(0);
         String total=stats.get("total").toString();
         String rejected=stats.get("rejected").toString();

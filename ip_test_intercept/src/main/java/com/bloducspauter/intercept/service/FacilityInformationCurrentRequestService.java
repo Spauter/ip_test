@@ -1,7 +1,6 @@
 package com.bloducspauter.intercept.service;
 
 
-import com.bloducspauter.base.dto.ResultDto;
 import com.bloducspauter.base.entities.FacilityInformation;
 import com.bloducspauter.base.po.CountResultPo;
 
@@ -19,10 +18,14 @@ public interface FacilityInformationCurrentRequestService {
     int addFacilityInformation(FacilityInformation fi);
 
     /*
-     *统计最近20s内接收到的对象信息
+     *统计最近20s内被拦截的访问信息
      */
-
     CountResultPo currentRejectIps();
 
-    CountResultPo countCurrent(int s);
+    /**
+     * 统计最近几秒到几秒的数据
+     * @param start 离当前时间较远的时间点
+     * @param end 离当前时间较近的时间点
+     */
+    CountResultPo countCurrent(int start,int end);
 }

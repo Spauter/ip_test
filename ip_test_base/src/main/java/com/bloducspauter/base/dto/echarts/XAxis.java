@@ -6,14 +6,13 @@ import lombok.Setter;
 
 /**
  * @author Bloduc Spauter
- *
  */
 @Setter
-@ApiModel(description = "X轴相关简单设置",value = "xAxis")
+@ApiModel(description = "X轴相关简单设置", value = "xAxis")
 public class XAxis {
-    public static final String TYPE ="category";
+    private String type = "category";
     @ApiModelProperty("X轴数据单位,默认为时间")
-    private  String name="时间";
+    private String name = "时间";
     @ApiModelProperty("X轴数据")
     private Object[] data;
     @ApiModelProperty("是否显示网格")

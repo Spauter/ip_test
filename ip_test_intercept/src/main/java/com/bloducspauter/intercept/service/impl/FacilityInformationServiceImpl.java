@@ -1,17 +1,16 @@
 package com.bloducspauter.intercept.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bloducspauter.base.page.PageData;
 import com.bloducspauter.base.page.PageParams;
 import com.bloducspauter.base.entities.FacilityInformation;
-import com.bloducspauter.base.po.TotalRejectedPo;
 import com.bloducspauter.base.sort.SortData;
 import com.bloducspauter.base.sort.SortParams;
 import com.bloducspauter.intercept.mapper.FacilityInformationMapper;
 import com.bloducspauter.intercept.service.FacilityInformationService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
@@ -36,11 +35,13 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
         //判断是否存在，没有作添加否则做更新
         if (selectedEntity != null) {
             log.info("Entity {} is already exists, updating...", requestFacilityInformation.getId());
+            FacilityInformation facilityInformation=new FacilityInformation();
+            BeanUtils.copyProperties(requestFacilityInformation,facilityInformation);
             int total = selectedEntity.getTotalRequest() + requestFacilityInformation.getTotalRequest();
             int rejected = selectedEntity.getRejectedRequest() + requestFacilityInformation.getRejectedRequest();
-            requestFacilityInformation.setTotalRequest(total);
-            requestFacilityInformation.setRejectedRequest(rejected);
-            return update(requestFacilityInformation);
+            facilityInformation.setTotalRequest(total);
+            facilityInformation.setRejectedRequest(rejected);
+            return update(facilityInformation);
         } else {
             return requestEntityMapper.insert(requestFacilityInformation);
         }
@@ -81,7 +82,7 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
     @Override
     public SortData<FacilityInformation> sortData(SortParams sortParams) {
         QueryWrapper<FacilityInformation> queryWrapper = new QueryWrapper<>();
-        boolean isSort = sortParams.isSort();
+        boolean isSort = "ASC".equalsIgnoreCase(sortParams.getSort());
         String sortBy = sortParams.getSortBy();
         queryWrapper.orderBy(true, isSort, sortBy);
         queryWrapper.last("limit " + sortParams.getLimit());
@@ -105,6 +106,14 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
         facilityInformationQueryWrapper.eq("status",1);
         facilityInformationQueryWrapper.select("id");
         return requestEntityMapper.selectObjs(facilityInformationQueryWrapper);
+    }
+
+    @Override
+    public int getForbiddenEntitiesCount() {
+        QueryWrapper<FacilityInformation>queryWrapper=new QueryWrapper<>();
+        queryWrapper.select("ip_address");
+        queryWrapper.eq("status",1);
+       return requestEntityMapper.selectCount(queryWrapper);
     }
 
 }

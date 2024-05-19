@@ -7,18 +7,17 @@ import com.bloducspauter.intercept.service.FacilityInformationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 先前拦截器，在第一位
@@ -41,7 +40,7 @@ public class PreInterceptor implements HandlerInterceptor {
 
     private static final long TIME_PERIOD = 60 * 1000;
 
-    private final Map<Integer, Integer> blacklists = new ConcurrentHashMap<>();
+    private final Map<Integer, Integer> blacklists = new ConcurrentSkipListMap<>();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -80,6 +79,34 @@ public class PreInterceptor implements HandlerInterceptor {
             //Map中移除
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
+        String path = request.getServletPath();
+        log.info(path);
+        if (!path.matches("current_total")) {
+            return;
+        }
+        List<String> newBlackList;
+        try {
+             newBlackList= (List<String>) redisTemplate.opsForValue().get("newBlackList");
+        } catch (Exception e) {
+            log.warn("Adding failed because of {}",e.getClass().getSimpleName());
+            log.debug(e.getLocalizedMessage());
+            return;
+        }
+        if (newBlackList == null) {
+            log.warn("No new blacklist entities to add");
+            return;
+        }
+        newBlackList.forEach(id->{
+            int sid= Integer.parseInt(id);
+            log.info("adding {} into blacklist",sid);
+            blacklists.put(sid,sid);
+        });
+    }
+
 
     /**
      * 提前获取被禁止的对象,并加载到redis缓存里面

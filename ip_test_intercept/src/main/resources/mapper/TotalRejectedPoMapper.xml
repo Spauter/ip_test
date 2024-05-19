@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bloducspauter.intercept.mapper.TotalRejectedPoMapper">
-<resultMap id="totalRejectedPo" type="com.bloducspauter.base.po.TotalRejectedPo"/>
-    <select id="getRejectedIps" resultType="com.bloducspauter.base.po.TotalRejectedPo">
-        select count(ip_address) AS totalRejected from request_entity where status=1;
-    </select>
-</mapper>

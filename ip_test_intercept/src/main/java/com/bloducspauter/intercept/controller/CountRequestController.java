@@ -60,7 +60,7 @@ public class CountRequestController {
     }
 
     @GetMapping("/sort_page")
-    @ApiOperation("展示前几名排在几名的对象")
+    @ApiOperation("展示前几名的对象")
     public SortData<FacilityInformation> sortData(SortParams sortParams) {
         try {
             return facilityInformationService.sortData(sortParams);
@@ -69,4 +69,13 @@ public class CountRequestController {
             return null;
         }
     }
+
+    @ApiOperation("统计到目前为止被封禁的设备数量")
+    @GetMapping("/blacklist")
+    public ResultDto showBlacklist() {
+        int count= facilityInformationService.getForbiddenEntitiesCount();
+        return new ResultDto(HttpStatus.OK.value(), "查询成功",count);
+    }
+
+
 }

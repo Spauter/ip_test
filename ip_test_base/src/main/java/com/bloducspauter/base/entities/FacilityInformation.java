@@ -1,11 +1,13 @@
 package com.bloducspauter.base.entities;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * 发出请求的对象的基本信息
@@ -15,7 +17,8 @@ import lombok.Data;
 @TableName(value = "request_entity")
 @AllArgsConstructor
 @ApiModel(value="请求的设备基本信息")
-public class FacilityInformation {
+@NoArgsConstructor
+public class FacilityInformation implements Serializable {
     /**
      * 设备ID
      */

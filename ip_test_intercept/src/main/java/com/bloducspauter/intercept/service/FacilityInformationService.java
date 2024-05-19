@@ -67,4 +67,5 @@ public interface FacilityInformationService {
 
     List<Object>getForbiddenEntities();
 
+    int getForbiddenEntitiesCount();
 }

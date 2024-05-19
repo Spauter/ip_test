@@ -2,19 +2,24 @@ package com.bloducspauter.intercept.config.intercept;
 
 import com.bloducspauter.base.entities.FacilityInformation;
 import com.bloducspauter.base.utils.GetIpUtil;
+import com.bloducspauter.intercept.service.FacilityInformationCurrentRequestService;
 import com.bloducspauter.intercept.service.FacilityInformationService;
 import eu.bitwalker.useragentutils.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
@@ -33,7 +38,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     // 同一时间段内允许的最大请求数
     private static final int MAX_REQUESTS = 120;
     // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
-    private static final long TIME_PERIOD = 60 * 1000;
+    private static final long TIME_PERIOD = 10 * 1000;
 
     private final Map<String, Integer> requestCounts = new ConcurrentSkipListMap<>();
 
@@ -41,6 +46,12 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     @Resource
     private FacilityInformationService requestEntityService;
+
+    @Resource
+    private FacilityInformationCurrentRequestService facilityInformationService;
+
+    @Resource
+    RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 这个方法将在请求处理之前进行调用。注意：如果该方法的返回值为false ，
@@ -57,7 +68,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         requestCounts.put(ipAddress, requestCounts.getOrDefault(ipAddress, 0) + 1);
         //如果当前访问就开始统计
         if (isNew) {
-            countAfterIntercept(request, id, ipAddress, userAgentObj);
+            countAfterIntercept(id, ipAddress, userAgentObj);
             isNew = false;
             return true;
         } else if (requestCounts.get(ipAddress) == MAX_REQUESTS) {
@@ -66,7 +77,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                     id, ipAddress, userAgentObj.getBrowser().getName(), userAgentObj.getOperatingSystem().getName());
         }
         // 检查 IP 地址是否已经达到最大请求数
-        else if (requestCounts.get(ipAddress) >= MAX_REQUESTS) {
+        else if (requestCounts.get(ipAddress) > MAX_REQUESTS) {
             //设置响应状态码
             response.setStatus(429);
             response.getWriter().write("Too many requests from this IP address");
@@ -98,7 +109,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
      * @param address      请求的地址
      * @param userAgentObj 请求的{@code UserAgent}
      */
-    private void countAfterIntercept(HttpServletRequest request, Integer id, String address, UserAgent userAgentObj) {
+    private void countAfterIntercept(Integer id, String address, UserAgent userAgentObj) {
         // 在指定时间后清除 IP 地址的请求数
         scheduler.schedule(() -> {
             int totalRequests = requestCounts.get(address);
@@ -108,6 +119,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 String operatingSystem = userAgentObj.getOperatingSystem().getName();
                 FacilityInformation requestFacilityInformation = new FacilityInformation(id, operatingSystem, browser, totalRequests, rejectedRequest, address, 0);
                 requestEntityService.insert(requestFacilityInformation);
+                facilityInformationService.addFacilityInformation(requestFacilityInformation);
             } catch (Exception e) {
                 log.error(e.getLocalizedMessage());
             }
@@ -116,18 +128,5 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             isNew = true;
             log.info("address {} can request again", address);
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);
-    }
-
-    @PostConstruct
-    private void countCurrentForbiddenIps(){
-        log.info("starting quartz for current...");
-        getCountCurrentForbiddenIps();
-    }
-
-    @Scheduled(cron = "15/5 * * * * ?")
-    private void getCountCurrentForbiddenIps(){
-        int total=requestCounts.size();
-
-
     }
 }

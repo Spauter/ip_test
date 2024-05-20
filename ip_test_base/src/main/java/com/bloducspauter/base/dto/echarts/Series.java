@@ -2,15 +2,18 @@ package com.bloducspauter.base.dto.echarts;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Setter;
+import lombok.Data;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Bloduc Spauter
  *
  */
-@Setter
-@ApiModel(description = "显示的具体曲线图内容")
-public class Series {
+@Data
+@ApiModel("显示的具体曲线图内容")
+public class Series   {
     @ApiModelProperty("数据名称")
     private String name;
     @ApiModelProperty("连线类型（比如直线虚线），默认为直线")
@@ -22,5 +25,5 @@ public class Series {
     @ApiModelProperty("拐点的大小，默认3")
     private int symbolSize=3;
     @ApiModelProperty("具体的数据")
-    private Object[] data;
+    public List<Object> data=new ArrayList<>();
 }

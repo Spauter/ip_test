@@ -3,7 +3,9 @@ package com.bloducspauter.base.po;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -14,6 +16,8 @@ import java.util.Date;
  */
 @Data
 @ApiModel("请求对象统计结果")
+@AllArgsConstructor
+@NoArgsConstructor
 public class CountResultPo {
     @ApiModelProperty("总请求数量")
     private Integer totalRequests;

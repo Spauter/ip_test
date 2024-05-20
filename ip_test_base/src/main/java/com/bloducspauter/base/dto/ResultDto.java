@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @AllArgsConstructor
 @Data
-@ApiModel(value = "请求结果")
+@ApiModel(value = "通用请求结果")
 public class ResultDto {
     @ApiModelProperty(value = "状态码")
     private Integer code;

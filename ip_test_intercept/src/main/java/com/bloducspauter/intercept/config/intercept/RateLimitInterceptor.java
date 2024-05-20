@@ -7,19 +7,13 @@ import com.bloducspauter.intercept.service.FacilityInformationService;
 import eu.bitwalker.useragentutils.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
@@ -36,9 +30,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
     // 同一时间段内允许的最大请求数
-    private static final int MAX_REQUESTS = 120;
+    private static final int MAX_REQUESTS = 20;
     // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
-    private static final long TIME_PERIOD = 10 * 1000;
+    private static final long TIME_PERIOD = 5 * 1000;
 
     private final Map<String, Integer> requestCounts = new ConcurrentSkipListMap<>();
 
@@ -49,9 +43,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     @Resource
     private FacilityInformationCurrentRequestService facilityInformationService;
-
-    @Resource
-    RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 这个方法将在请求处理之前进行调用。注意：如果该方法的返回值为false ，

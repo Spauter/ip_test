@@ -3,15 +3,16 @@ package com.bloducspauter.intercept.config.intercept;
 
 import com.bloducspauter.base.entities.FacilityInformation;
 import com.bloducspauter.base.utils.GetIpUtil;
+import com.bloducspauter.intercept.config.init.RedisInitializer;
+import com.bloducspauter.intercept.service.FacilityInformationCurrentRequestService;
 import com.bloducspauter.intercept.service.FacilityInformationService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,18 +28,24 @@ import java.util.concurrent.*;
  */
 @Component
 @Slf4j
-public class PreInterceptor implements HandlerInterceptor {
+public class PreInterceptor implements HandlerInterceptor, InitializingBean {
     @Resource
     FacilityInformationService service;
 
     @Resource
     RedisTemplate<String, Object> redisTemplate;
 
+    @Resource
+    FacilityInformationCurrentRequestService currentRequestService;
+
+    @Resource
+    RedisInitializer redisInitializer;
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private boolean isRequested = false;
 
-    private static final long TIME_PERIOD = 60 * 1000;
+    private static final long TIME_PERIOD = 5 * 1000;
 
     private final Map<Integer, Integer> blacklists = new ConcurrentSkipListMap<>();
 
@@ -54,7 +61,7 @@ public class PreInterceptor implements HandlerInterceptor {
             }
             blacklists.put(id, blacklists.getOrDefault(id, 0) + 1);
             response.setStatus(HttpStatus.FORBIDDEN.value());
-            response.getWriter().println("403 Forbidden");
+            response.getWriter().println("You don't have permission to interview ut");
             return false;
         } else {
             return true;
@@ -68,6 +75,7 @@ public class PreInterceptor implements HandlerInterceptor {
                 FacilityInformation facilityInformation = service.findById(id);
                 int originTotalRequests = facilityInformation.getTotalRequest();
                 int originRejectRequests = facilityInformation.getRejectedRequest();
+                currentRequestService.addFacilityInformation(facilityInformation);
                 facilityInformation.setTotalRequest(totalRequests + originTotalRequests);
                 facilityInformation.setRejectedRequest(totalRequests + originRejectRequests);
                 service.update(facilityInformation);
@@ -84,7 +92,6 @@ public class PreInterceptor implements HandlerInterceptor {
     @SuppressWarnings("unchecked")
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
         String path = request.getServletPath();
-        log.info(path);
         if (!path.matches("current_total")) {
             return;
         }
@@ -100,6 +107,7 @@ public class PreInterceptor implements HandlerInterceptor {
             log.warn("No new blacklist entities to add");
             return;
         }
+        blacklists.clear();
         newBlackList.forEach(id->{
             int sid= Integer.parseInt(id);
             log.info("adding {} into blacklist",sid);
@@ -110,12 +118,13 @@ public class PreInterceptor implements HandlerInterceptor {
 
     /**
      * 提前获取被禁止的对象,并加载到redis缓存里面
-     * {@code PostConstruct}在springBoot启动时会执行并且只会执行一次
+     * 在所哟{@code PostConstruct}执行完后才会执行
      */
-    @PostConstruct
-    public void loadBlacklistEntities() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         log.info("starting loading all forbidden entities");
         try {
+            redisInitializer.delCache(redisTemplate);
             List<Object> list = service.getForbiddenEntities();
             if (list.isEmpty()) {
                 log.warn("Empty forbidden entities");

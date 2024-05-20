@@ -46,70 +46,81 @@ public class CountRequestControllerExceptionHandler {
      * @return
      */
     @Order(-2000)
-    @ExceptionHandler({IllegalParamException.class,NullPointerException.class})
+    @ExceptionHandler({IllegalParamException.class, NullPointerException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String,Object> customException(Exception e) {
-        Map<String,Object>map=new HashMap<>();
-        //记录异常
-        log.error(e.getMessage());
-        //解析出异常信息
+    public Map<String, Object> customException(Exception e) {
+        Map<String, Object> map = new HashMap<>();
+        // 记录异常
+        log.error(e.getMessage(), e);
+        // 解析出异常信息
         String errMessage = e.getMessage();
-        map.put("code",500);
+        map.put("code", 500);
         if (e instanceof IllegalParamException) {
             map.put("msg", "好像有不合法的参数");
-            map.put("cause",e.getCause());
+            map.put("cause", e.getCause());
         } else {
-            map.put("msg","服务器可能接收到了空数据");
+            map.put("msg", "服务器可能接收到了空数据");
             map.put("cause", CommonError.REQUEST_NULL.getErrMessage());
         }
         return map;
     }
 
-
     @ExceptionHandler(InsertEntityFailedException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String,Object> customException(InsertEntityFailedException e) {
-        Map<java.lang.String, java.lang.Object>map=new HashMap<>();
-        log.error(e.getMessage());
+    public Map<String, Object> customException(InsertEntityFailedException e) {
+        Map<String, Object> map = new HashMap<>();
+        log.error(e.getMessage(), e);
         String errMessage = "这个数据好像插不进去";
-        map.put("code",500);
-        map.put("msg",errMessage);
-        map.put("cause",e.getCause());
+        map.put("code", 500);
+        map.put("msg", errMessage);
+        map.put("cause", e.getCause());
         return map;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public  Map<String,Object> customException(MethodArgumentNotValidException exception) {
-        Map<java.lang.String, java.lang.Object>map=new HashMap<>();
+    public Map<String, Object> customException(MethodArgumentNotValidException exception) {
+        Map<String, Object> map = new HashMap<>();
         BindingResult bindingResult = exception.getBindingResult();
-        //存储错误信息
+        // 存储错误信息
         List<String> errors = new ArrayList<>();
         bindingResult.getFieldErrors().forEach(item -> {
             errors.add(item.getDefaultMessage());
         });
-
-        //将list中的错误信息拼接起来
-        String errMessage = StringUtils.join(errors, ',');
-        //记录异常
-        log.error("系统异常{},原因{}", exception.getMessage(), errMessage);
-
-        map.put("code",500);
-        map.put("msg",errMessage);
-        map.put("cause",exception.getCause());
+        // 将list中的错误信息拼接起来
+        String errMessage = String.join(", ", errors);
+        // 记录异常
+        log.error("系统异常{}, 原因{}", exception.getMessage(), errMessage);
+        map.put("code", 500);
+        map.put("msg", errMessage);
+        map.put("cause", exception.getCause());
         return map;
     }
 
     @ExceptionHandler(SQLException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String,Object> exception(SQLException e) {
-        Map<String,Object>map=new HashMap<>();
-        //记录异常
+    public Map<String, Object> handleSQLException(SQLException e) {
+        Map<String, Object> map = new HashMap<>();
+        // 记录异常
         log.error("系统异常{}", e.getMessage(), e);
-        //解析出异常信息
-        map.put("code",500);
-        map.put("msg","数据库抽风了,请稍后再试");
-        map.put("cause",e.getCause());
+        // 解析出异常信息
+        map.put("code", 500);
+        map.put("msg", "数据库抽风了, 请稍后再试");
+        map.put("cause", e.getCause());
+        return map;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, Object> handleException(Exception e) {
+        Map<String, Object> map = new HashMap<>();
+        // 记录异常
+        log.error("服务器出现异常{}", e.getMessage(), e);
+        // 解析出异常信息
+        map.put("code", 500);
+        map.put("msg", "服务器抽风了, 请稍后再试");
+        map.put("cause", e.getCause());
         return map;
     }
 }
+

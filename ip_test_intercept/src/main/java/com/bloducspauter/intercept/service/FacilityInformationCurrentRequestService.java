@@ -24,8 +24,8 @@ public interface FacilityInformationCurrentRequestService {
 
     /**
      * 统计最近几秒到几秒的数据
-     * @param start 离当前时间较远的时间点
-     * @param end 离当前时间较近的时间点
+     * @param start 离当前时间较近的时间点
+     * @param end 离当前时间较远的时间点
      */
     CountResultPo countCurrent(int start,int end);
 }

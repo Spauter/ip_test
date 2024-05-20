@@ -14,8 +14,8 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @MapperScan(value = {"com.bloducspauter.intercept.mapper"})
 @EnableRedisHttpSession
 @EnableDiscoveryClient
-public class App {
+public class InterceptApplication {
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(InterceptApplication.class, args);
     }
 }

@@ -6,15 +6,13 @@ spring:
         namespace: 089be718-0452-4597-a46c-ac69580396c4
         username: nacos
         password: nacos
-        prefix: IP_test_interrupt.yml
+        prefix: IP_test_index.yml
         group: IP_test
         file-extension: yml
         shared-configs:
           - {data-id: 'common.yml',refresh: true,group: IP_test}
-          - {data-id: 'mysql8.yml',refresh: true,group: IP_test}
-          - {data-id: 'redis_local.yml',refresh: true,group: IP_test}
       discovery:
         group: IP_test
         namespace: 089be718-0452-4597-a46c-ac69580396c4
-        service: IP_test_interrupt
+        service: IP_test_index
         server-addr:  http://192.168.24.128:8848

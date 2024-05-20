@@ -9,7 +9,6 @@
     <modules>
         <module>ip_test_intercept</module>
         <module>ip_test_base</module>
-        <module>ip_test_gateway</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

@@ -7,6 +7,8 @@ import com.bloducspauter.intercept.service.FacilityInformationService;
 import eu.bitwalker.useragentutils.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -30,7 +32,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
     // 同一时间段内允许的最大请求数
-    private static final int MAX_REQUESTS = 20;
+    private static  int MAX_REQUESTS = 1000;
     // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
     private static final long TIME_PERIOD = 5 * 1000;
 
@@ -44,12 +46,18 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     @Resource
     private FacilityInformationCurrentRequestService facilityInformationService;
 
+    @Resource
+    private RedisTemplate<String,Object>redisTemplate;
     /**
      * 这个方法将在请求处理之前进行调用。注意：如果该方法的返回值为false ，
      * 将视为当前请求结束，不仅自身的拦截器会失效，还会导致其他的拦截器也不再执行。
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String origin=request.getHeader("Diy_name");
+        if ("Bloduc Spauter".equalsIgnoreCase(origin)) {
+            return true;
+        }
         GetIpUtil getIpUtil = new GetIpUtil();
         String ipAddress = getIpUtil.getIpAddress(request);
         String userAgent = request.getHeader("User-Agent");
@@ -77,21 +85,28 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    /**
-     * 会在Controller 中的方法调用之后，DispatcherServlet 返回渲染视图之前被调用。
-     * 有意思的是：postHandle() 方法被调用的顺序跟 preHandle() 是相反的，
-     * 先声明的拦截器 preHandle() 方法先执行，而postHandle()方法反而会后执行。
-     * 需要前者{@link #preHandle(HttpServletRequest, HttpServletResponse, Object)}返回结果为true时才会执行此方法
-     *
-     * @param request  请求
-     * @param response 回复
-     * @param handler  请求头
-     * @throws Exception 包括{@code IOException}、{@code SQLException}
-     */
-//    @Override
-//    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
-//
-//    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
+        String path = request.getServletPath();
+        if (!path.endsWith("max_allow")) {
+            return;
+        }
+        Object max=redisTemplate.opsForValue().get("max_allow");
+        log.info("Updating MAX_REQUESTS");
+        if (max == null) {
+            log.warn("No data,using default value {}",1000);
+            return;
+        }
+        try {
+            String maxAllow = max.toString();
+            MAX_REQUESTS = Integer.parseInt(maxAllow);
+            log.info("updating finished: {}", maxAllow);
+        } catch (Exception e) {
+            log.error("Updating failed because of {},{}",e.getClass().getSimpleName(),e.getMessage());
+            log.warn("No data,using default value {}",1000);
+        }
+    }
 
     /**
      * 开始统计设备id访问次数，并存入数据库

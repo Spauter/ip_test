@@ -1,23 +1,20 @@
 package com.bloducspauter.intercept.controller;
 
+import com.bloducspauter.base.dto.ResultDto;
 import com.bloducspauter.base.dto.echarts.*;
 import com.bloducspauter.base.po.CountResultPo;
 import com.bloducspauter.intercept.service.FacilityInformationCurrentRequestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.annotation.Resource;
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,6 +27,9 @@ import java.util.List;
 public class CountCurrentController {
     @Resource
     private FacilityInformationCurrentRequestService service;
+
+    @Resource
+    RedisTemplate<String,Object>redisTemplate;
 
     @GetMapping("/total_count")
     @ApiOperation("查询最近时间访问情况,其中参数s为秒数")
@@ -62,6 +62,16 @@ public class CountCurrentController {
         series.add(total);
         series.add(reject);
         return series;
+    }
+
+    @ApiOperation("设置最大拦截数量,没有默认为1000")
+    @GetMapping("max_allow")
+    public ResultDto setMaxAllow(int maximum) {
+        if (maximum < 1000) {
+            return new ResultDto(HttpStatus.NOT_ACCEPTABLE.value(),"最小为1000",maximum);
+        }
+        redisTemplate.opsForValue().set("max_allow",maximum);
+        return new ResultDto(HttpStatus.OK.value(),"操作成功",maximum);
     }
 }
 

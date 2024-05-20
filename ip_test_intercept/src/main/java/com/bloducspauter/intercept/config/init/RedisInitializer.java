@@ -34,4 +34,5 @@ public class RedisInitializer {
         log.info("removed all keys");
         return true;
     }
+
 }

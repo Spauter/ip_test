@@ -5,7 +5,6 @@ import com.bloducspauter.base.enums.CommonError;
 import com.bloducspauter.base.exceptions.IllegalParamException;
 import com.bloducspauter.base.exceptions.InsertEntityFailedException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;

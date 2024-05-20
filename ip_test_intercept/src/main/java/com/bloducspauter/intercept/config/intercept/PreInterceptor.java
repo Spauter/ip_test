@@ -92,7 +92,7 @@ public class PreInterceptor implements HandlerInterceptor, InitializingBean {
     @SuppressWarnings("unchecked")
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
         String path = request.getServletPath();
-        if (!path.matches("current_total")) {
+        if (!path.endsWith("current_total")) {
             return;
         }
         List<String> newBlackList;

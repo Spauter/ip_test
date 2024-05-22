@@ -37,7 +37,7 @@ public interface FacilityInformationService {
      * 根据设备Id查找实体信息
      * @param id ID
      */
-    FacilityInformation findById(int id);
+    FacilityInformation findById(String address);
 
     /**
      * 查找所有实体信息
@@ -68,4 +68,5 @@ public interface FacilityInformationService {
     List<Object>getForbiddenEntities();
 
     int getForbiddenEntitiesCount();
+
 }

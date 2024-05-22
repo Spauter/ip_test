@@ -45,7 +45,7 @@ public class CountRequestControllerExceptionHandler {
      * @return
      */
     @Order(-2000)
-    @ExceptionHandler({IllegalParamException.class, NullPointerException.class})
+    @ExceptionHandler({IllegalParamException.class, NullPointerException.class,IllegalArgumentException.class,IllegalStateException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> customException(Exception e) {
         Map<String, Object> map = new HashMap<>();
@@ -54,12 +54,12 @@ public class CountRequestControllerExceptionHandler {
         // 解析出异常信息
         String errMessage = e.getMessage();
         map.put("code", 500);
-        if (e instanceof IllegalParamException) {
-            map.put("msg", "好像有不合法的参数");
-            map.put("cause", e.getCause());
-        } else {
+        if (e instanceof NullPointerException) {
             map.put("msg", "服务器可能接收到了空数据");
             map.put("cause", CommonError.REQUEST_NULL.getErrMessage());
+        } else {
+            map.put("msg", "好像有不合法的参数");
+            map.put("cause", e.getCause());
         }
         return map;
     }

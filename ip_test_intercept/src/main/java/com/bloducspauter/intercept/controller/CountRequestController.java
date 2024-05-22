@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 控制层
@@ -34,18 +36,19 @@ public class CountRequestController {
     @Resource
     FacilityInformationService facilityInformationService;
 
+
     @PostMapping("/forbid")
-    @ApiOperation(value = "对某个设备或者IP进行封禁操作")
+    @ApiOperation(value = "对或者IP进行封禁操作")
     public ResultDto forbidAnEntities(QueryFacilityInformationParamsDto params) {
-        Integer id=params.getId();
-        int status=params.getStatus();
-        FacilityInformation facilityInformation = facilityInformationService.findById(id);
+        String ip = params.getIp();
+        int status = params.getStatus();
+        FacilityInformation facilityInformation = facilityInformationService.findById(ip);
         if (facilityInformation == null) {
-            return new ResultDto(HttpStatus.NOT_FOUND.value(),CommonError.QUERY_NULL.getErrMessage(),null);
+            return new ResultDto(HttpStatus.NOT_FOUND.value(), CommonError.QUERY_NULL.getErrMessage(), null);
         }
-        facilityInformation.setStatus(status);
+        facilityInformation.setStatus(1);
         facilityInformationService.update(facilityInformation);
-        return new ResultDto(HttpStatus.OK.value(),"操作成功",null);
+        return new ResultDto(HttpStatus.OK.value(), "操作成功", null);
     }
 
     @GetMapping("/query_page")
@@ -73,8 +76,8 @@ public class CountRequestController {
     @ApiOperation("统计到目前为止被封禁的设备数量")
     @GetMapping("/blacklist")
     public ResultDto showBlacklist() {
-        int count= facilityInformationService.getForbiddenEntitiesCount();
-        return new ResultDto(HttpStatus.OK.value(), "查询成功",count);
+        int count = facilityInformationService.getForbiddenEntitiesCount();
+        return new ResultDto(HttpStatus.OK.value(), "查询成功", count);
     }
 
 

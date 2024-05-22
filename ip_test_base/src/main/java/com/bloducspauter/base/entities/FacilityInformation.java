@@ -1,5 +1,6 @@
 package com.bloducspauter.base.entities;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -48,6 +49,7 @@ public class FacilityInformation implements Serializable {
      * 请求Ip地址
      */
     @ApiModelProperty("发出请求的IP地址")
+    @TableId
     private String ipAddress;
     /**
      * 状态0.正常，1封禁

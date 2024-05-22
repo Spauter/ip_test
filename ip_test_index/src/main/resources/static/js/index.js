@@ -1,6 +1,6 @@
 const myChart = echarts.init(document.getElementById('main'));
 function init() {
-    axios.get('http://192.168.43.132:11420/intercept/current_count', {
+    axios.get('http://192.168.0.9:11420/intercept/current_count', {
         headers: {
             'diy_name': 'Bloduc Spauter'
         }
@@ -15,7 +15,7 @@ function init() {
                 xAxis: {
                     type: 'category',
                     name: '时间',
-                    data: ['60', '55', '50', '45', '40', '35', '30', '25', '20', '15', '10']
+                    data: ['60', '55', '50', '45', '40', '35', '30', '25', '20', '15', '10','5']
                 },
                 yAxis: {
                     type: 'value'

@@ -57,7 +57,7 @@ public class CountCurrentController {
             total.getData().add(countResultPo.getTotalRequests());
             reject.getData().add(countResultPo.getRejectedRequest());
             start -= 5;
-        } while (start - 5 > 0);
+        } while (start > 0);
         List<Series> series = new ArrayList<>();
         series.add(total);
         series.add(reject);
@@ -67,8 +67,8 @@ public class CountCurrentController {
     @ApiOperation("设置最大拦截数量,没有默认为1000")
     @GetMapping("max_allow")
     public ResultDto setMaxAllow(int maximum) {
-        if (maximum < 1000) {
-            return new ResultDto(HttpStatus.NOT_ACCEPTABLE.value(),"最小为1000",maximum);
+        if (maximum < 200) {
+            return new ResultDto(HttpStatus.NOT_ACCEPTABLE.value(),"最小为200",maximum);
         }
         redisTemplate.opsForValue().set("max_allow",maximum);
         return new ResultDto(HttpStatus.OK.value(),"操作成功",maximum);

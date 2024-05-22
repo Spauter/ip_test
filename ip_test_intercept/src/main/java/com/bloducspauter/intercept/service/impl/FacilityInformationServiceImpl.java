@@ -13,11 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.annotation.Resource;
 import java.util.List;
+
 /**
  * @author Bloduc Spauter
- *
  */
 @Slf4j
 @Service
@@ -29,22 +30,18 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
     @Override
     @Transactional
     public int insert(FacilityInformation requestFacilityInformation) {
-        int id = requestFacilityInformation.getId();
-        log.info("id:{}", id);
-        FacilityInformation selectedEntity = findById(id);
-        //判断是否存在，没有作添加否则做更新
-        if (selectedEntity != null) {
-            log.info("Entity {} is already exists, updating...", requestFacilityInformation.getId());
-            FacilityInformation facilityInformation=new FacilityInformation();
-            BeanUtils.copyProperties(requestFacilityInformation,facilityInformation);
-            int total = selectedEntity.getTotalRequest() + requestFacilityInformation.getTotalRequest();
-            int rejected = selectedEntity.getRejectedRequest() + requestFacilityInformation.getRejectedRequest();
-            facilityInformation.setTotalRequest(total);
-            facilityInformation.setRejectedRequest(rejected);
-            return update(facilityInformation);
-        } else {
-            return requestEntityMapper.insert(requestFacilityInformation);
+        String ip = requestFacilityInformation.getIpAddress();
+        log.info("ip:{}", ip);
+        FacilityInformation origin=requestEntityMapper.selectById(ip);
+        if (origin != null) {
+            log.info("Entity already exists,updating");
+            int total=requestFacilityInformation.getTotalRequest()+origin.getTotalRequest();
+            int reject=requestFacilityInformation.getRejectedRequest()+origin.getRejectedRequest();
+            origin.setTotalRequest(total);
+            origin.setRejectedRequest(reject);
+            return requestEntityMapper.updateById(origin);
         }
+        return requestEntityMapper.insert(requestFacilityInformation);
     }
 
     @Override
@@ -58,8 +55,8 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
     }
 
     @Override
-    public FacilityInformation findById(int id) {
-        return requestEntityMapper.selectById(id);
+    public FacilityInformation findById(String ipAddress) {
+        return requestEntityMapper.selectById(ipAddress);
     }
 
     @Override
@@ -102,18 +99,18 @@ public class FacilityInformationServiceImpl implements FacilityInformationServic
 
     @Override
     public List<Object> getForbiddenEntities() {
-        QueryWrapper<FacilityInformation>facilityInformationQueryWrapper=new QueryWrapper<>();
-        facilityInformationQueryWrapper.eq("status",1);
-        facilityInformationQueryWrapper.select("id");
+        QueryWrapper<FacilityInformation> facilityInformationQueryWrapper = new QueryWrapper<>();
+        facilityInformationQueryWrapper.eq("status", 1);
+        facilityInformationQueryWrapper.select("ip_address");
         return requestEntityMapper.selectObjs(facilityInformationQueryWrapper);
     }
 
     @Override
     public int getForbiddenEntitiesCount() {
-        QueryWrapper<FacilityInformation>queryWrapper=new QueryWrapper<>();
+        QueryWrapper<FacilityInformation> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("ip_address");
-        queryWrapper.eq("status",1);
-       return requestEntityMapper.selectCount(queryWrapper);
+        queryWrapper.eq("status", 1);
+        return requestEntityMapper.selectCount(queryWrapper);
     }
 
 }

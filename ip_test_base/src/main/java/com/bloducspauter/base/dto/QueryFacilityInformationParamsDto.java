@@ -12,8 +12,8 @@ import lombok.Data;
 @Data
 @ApiModel("对发出请求对象的查询条件或者状态，或者用于返回简单查询结果")
 public class QueryFacilityInformationParamsDto {
-    @ApiModelProperty("设备id，用于精确查询")
-    private Integer id;
+    @ApiModelProperty("设备ip，用于精确查询")
+    private String ip;
 
     @ApiModelProperty("操作系统名称")
     private String operatingSystem;

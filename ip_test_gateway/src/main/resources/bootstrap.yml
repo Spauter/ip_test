@@ -1,0 +1,18 @@
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: http://192.168.24.128:8848
+        namespace: 089be718-0452-4597-a46c-ac69580396c4
+        username: nacos
+        password: nacos
+        prefix: IP_test_gateway.yml
+        group: IP_test
+        file-extension: yml
+        shared-configs:
+          - {data-id: 'common.yml',refresh: true,group: IP_test}
+      discovery:
+        group: IP_test
+        namespace: 089be718-0452-4597-a46c-ac69580396c4
+        service: P_test_gateway.yml
+        server-addr:  http://192.168.24.128:8848

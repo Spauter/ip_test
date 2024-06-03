@@ -1,6 +1,6 @@
 const myChart = echarts.init(document.getElementById('main'));
 function init() {
-    axios.get('http://192.168.0.181:11420/intercept/current_count', {
+    axios.get('intercept/current_count', {
         headers: {
             'diy_name': 'Bloduc Spauter'
         }

@@ -1,9 +1,8 @@
-package com.bloducspauter.gateway;
+package com.bloducspauter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-
 /**
  * @author Bloduc Spauter
  *

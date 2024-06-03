@@ -14,5 +14,5 @@ spring:
       discovery:
         group: IP_test
         namespace: 089be718-0452-4597-a46c-ac69580396c4
-        service: P_test_gateway.yml
+        service: IP_test_gateway
         server-addr:  http://192.168.24.128:8848

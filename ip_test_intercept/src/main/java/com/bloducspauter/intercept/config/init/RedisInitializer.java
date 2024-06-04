@@ -16,8 +16,6 @@ import java.util.Set;
 public class RedisInitializer {
     /**
      * 清空redis里面所有的数据
-     * @param redisTemplate
-     * @return
      */
     @Bean
     public boolean delCache(RedisTemplate<String,Object> redisTemplate) {

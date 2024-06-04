@@ -21,10 +21,10 @@ import java.util.List;
  */
 @Slf4j
 public class OnlyOneLoadBalancer implements ReactorServiceInstanceLoadBalancer {
-    String serviceID;
+    String serviceId;
     private final ObjectProvider<ServiceInstanceListSupplier>serviceInstanceListSuppliers;
-    public OnlyOneLoadBalancer(ObjectProvider<ServiceInstanceListSupplier>serviceInstanceListSuppliers,String ServiceId){
-        this.serviceID =ServiceId;
+    public OnlyOneLoadBalancer(ObjectProvider<ServiceInstanceListSupplier>serviceInstanceListSuppliers,String serviceId){
+        this.serviceId =serviceId;
         this.serviceInstanceListSuppliers=serviceInstanceListSuppliers;
     }
 

@@ -1,14 +1,11 @@
 package com.bloducspauter.intercept.config.intercept;
 
 
-import com.bloducspauter.base.entities.FacilityInformation;
 import com.bloducspauter.base.utils.GetIpUtil;
 import com.bloducspauter.intercept.config.init.RedisInitializer;
 import com.bloducspauter.intercept.service.FacilityInformationCurrentRequestService;
 import com.bloducspauter.intercept.service.FacilityInformationService;
-import eu.bitwalker.useragentutils.UserAgent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;

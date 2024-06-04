@@ -67,8 +67,8 @@ public class CountCurrentController {
     @ApiOperation("设置最大拦截数量,没有默认为1000")
     @GetMapping("max_allow")
     public ResultDto setMaxAllow(int maximum) {
-        if (maximum < 200) {
-            return new ResultDto(HttpStatus.NOT_ACCEPTABLE.value(),"最小为200",maximum);
+        if (maximum < 20) {
+            return new ResultDto(HttpStatus.NOT_ACCEPTABLE.value(),"最小为20",maximum);
         }
         redisTemplate.opsForValue().set("max_allow",maximum);
         return new ResultDto(HttpStatus.OK.value(),"操作成功",maximum);

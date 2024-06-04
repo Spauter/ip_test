@@ -9,7 +9,10 @@ import org.apache.ibatis.annotations.Update;
  *
  */
 public interface FacilityInformationMapper extends BaseMapper<FacilityInformation> {
-
+    /**
+     * 清除所有表中所有数据
+     * @return 0 or 1
+     */
     @Update("TRUNCATE TABLE request_entity")
     int  truncate();
 }

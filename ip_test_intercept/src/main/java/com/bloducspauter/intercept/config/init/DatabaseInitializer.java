@@ -4,7 +4,6 @@ import com.bloducspauter.intercept.mapper.FacilityInformationCurrentRequestMappe
 import com.bloducspauter.intercept.mapper.FacilityInformationMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 

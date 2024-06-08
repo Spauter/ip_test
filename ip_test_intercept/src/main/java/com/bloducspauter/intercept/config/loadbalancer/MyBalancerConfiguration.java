@@ -1,5 +1,5 @@
 package com.bloducspauter.intercept.config.loadbalancer;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
+
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;

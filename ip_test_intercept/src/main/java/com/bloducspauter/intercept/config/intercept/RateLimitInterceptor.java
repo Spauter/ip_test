@@ -39,6 +39,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    private String protectedAddress="http://localhost:11451";
+
     @Resource
     private FacilityInformationService requestEntityService;
 
@@ -55,6 +57,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String origin=request.getParameter("diy_name");
         if ("Bloduc Spauter".equalsIgnoreCase(origin)) {
+            return true;
+        }
+        if (!request.getRequestURL().toString().startsWith(protectedAddress)) {
             return true;
         }
         GetIpUtil getIpUtil = new GetIpUtil();
@@ -84,13 +89,21 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return true;
     }
 
-
+//    @PostMapping("commit_form")
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
         String path = request.getServletPath();
-        if (!path.endsWith("max_allow")) {
+        if (path.endsWith("max_allow")) {
+            maxAllow();
+        }else if (path.endsWith("commit_form")) {
+
+        }else {
             return;
         }
+
+    }
+
+    public void maxAllow(){
         Object max=redisTemplate.opsForValue().get("max_allow");
         log.info("Updating MAX_REQUESTS");
         if (max == null) {
@@ -105,6 +118,15 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             log.error("Updating failed because of {},{}",e.getClass().getSimpleName(),e.getMessage());
             log.warn("No data,using default value {}",1000);
         }
+    }
+
+    public void protect(){
+        Object webAddress=redisTemplate.opsForValue().get("webAddress");
+        if (webAddress == null) {
+            log.warn("No website address");
+            return;
+        }
+        protectedAddress= webAddress.toString();
     }
 
     /**

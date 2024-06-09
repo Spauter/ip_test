@@ -11,9 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +89,15 @@ public class CountCurrentController {
         }
         redisTemplate.opsForValue().set("max_allow", maximum);
         return new ResultDto(HttpStatus.OK.value(), "操作成功", maximum);
+    }
+
+    @PostMapping("commit_form")
+    public ResultDto addProtection(HttpServletRequest request) {
+        String webAddress = request.getParameter("webAddress");
+        String apiKey = request.getParameter("apiKey");
+        String password=request.getParameter("password");
+        redisTemplate.opsForValue().set("webAddress", webAddress);
+        return new ResultDto(200,"操作成功",webAddress);
     }
 }
 

@@ -11,7 +11,7 @@ import java.util.List;
  *
  */
 @Data
-@ApiModel("显示的具体曲线图内容")
+@ApiModel("显示的具体曲线图内容，用于Echarts")
 public class Series   {
     @ApiModelProperty("数据名称")
     private String name;

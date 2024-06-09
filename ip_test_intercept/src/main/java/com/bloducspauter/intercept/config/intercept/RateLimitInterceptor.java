@@ -31,7 +31,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
     // 同一时间段内允许的最大请求数
-    private static  int MAX_REQUESTS = 20;
+    private static  int MAX_REQUESTS = 1000;
     // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
     private static final long TIME_PERIOD = 5 * 1000;
 
@@ -53,7 +53,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String origin=request.getHeader("Diy_name");
+        String origin=request.getParameter("diy_name");
         if ("Bloduc Spauter".equalsIgnoreCase(origin)) {
             return true;
         }

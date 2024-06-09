@@ -17,10 +17,11 @@ public interface FacilityInformationCurrentRequestService {
      */
     int addFacilityInformation(FacilityInformation fi);
 
-    /*
-     *统计最近20s内被拦截的访问信息
+    /**
+     * 统计最近被拦截的Ip;
+     * @param before 几秒前
      */
-    CountResultPo currentRejectIps();
+    CountResultPo currentRejectIps(int before);
 
     /**
      * 统计最近几秒到几秒的数据

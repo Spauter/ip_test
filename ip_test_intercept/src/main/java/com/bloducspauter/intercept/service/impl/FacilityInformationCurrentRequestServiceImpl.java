@@ -56,7 +56,7 @@ public class FacilityInformationCurrentRequestServiceImpl
     }
 
     @Override
-    public CountResultPo currentRejectIps() {
+    public CountResultPo currentRejectIps(int before) {
         QueryWrapper<FacilityInformationCurrentRequest>queryWrapper=new QueryWrapper<>();
         queryWrapper.select("SUM(total) as total",
                 "SUM(reject) as rejected",
@@ -64,8 +64,11 @@ public class FacilityInformationCurrentRequestServiceImpl
                 "COUNT(DISTINCT id) as ids"
         );
         queryWrapper.gt("reject",0);
-        LocalDateTime thirtySecondsAgo = LocalDateTime.now().minusSeconds(60);
-        queryWrapper.gt("update_time", thirtySecondsAgo);
+        //判断before是否小于1
+        LocalDateTime thirtySecondsAgo = LocalDateTime.now().minusSeconds(before);
+        if(before>0) {
+            queryWrapper.gt("update_time", thirtySecondsAgo);
+        }
         Map<String, Object> stats = facilityInformationCurrentRequestMapper.selectMaps(queryWrapper).get(0);
         return getCountResultPo(stats);
     }

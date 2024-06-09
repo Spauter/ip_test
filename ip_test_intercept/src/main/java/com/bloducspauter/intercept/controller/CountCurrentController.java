@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Bloduc Spauter
@@ -29,7 +31,7 @@ public class CountCurrentController {
     private FacilityInformationCurrentRequestService service;
 
     @Resource
-    RedisTemplate<String,Object>redisTemplate;
+    RedisTemplate<String, Object> redisTemplate;
 
     @GetMapping("/total_count")
     @ApiOperation("查询最近时间访问情况,其中参数s为秒数")
@@ -39,13 +41,13 @@ public class CountCurrentController {
 
     @ApiOperation("获取最近30s内被暂时限制的ip和设备数量")
     @GetMapping("/total_reject")
-    public CountResultPo showCurrentRejected() {
-        return service.currentRejectIps();
+    public CountResultPo showCurrentRejected(int before) {
+        return service.currentRejectIps(before);
     }
 
-    @ApiOperation("获取折线图数据")
-    @GetMapping("/current_count")
-    public List<Series> getCurrentCount() throws JsonProcessingException {
+    @ApiOperation("获取折线图数据，用于Echats")
+    @GetMapping("/current_count_e")
+    public List<Series> getCurrentCountInE() throws JsonProcessingException {
         Legend legend = new Legend();
         int start = 60;
         Series total = new Series();
@@ -64,14 +66,27 @@ public class CountCurrentController {
         return series;
     }
 
+    @ApiOperation("获取折线图数据，用于amcharts")
+    @GetMapping("current_count_a")
+    public Map<Integer, Object> getCurrentCountIna() {
+        Map<Integer, Object> map = new ConcurrentHashMap<>();
+        int start = 60;
+        do {
+            CountResultPo countResultPo = service.countCurrent(start, start - 5);
+            map.put(start,countResultPo);
+            start -= 5;
+        } while (start > 0);
+        return map;
+    }
+
     @ApiOperation("设置最大拦截数量,没有默认为1000")
     @GetMapping("max_allow")
     public ResultDto setMaxAllow(int maximum) {
-        if (maximum < 20) {
-            return new ResultDto(HttpStatus.NOT_ACCEPTABLE.value(),"最小为20",maximum);
+        if (maximum < 200) {
+            return new ResultDto(HttpStatus.NOT_ACCEPTABLE.value(), "最小为200", maximum);
         }
-        redisTemplate.opsForValue().set("max_allow",maximum);
-        return new ResultDto(HttpStatus.OK.value(),"操作成功",maximum);
+        redisTemplate.opsForValue().set("max_allow", maximum);
+        return new ResultDto(HttpStatus.OK.value(), "操作成功", maximum);
     }
 }
 

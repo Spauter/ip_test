@@ -18,6 +18,6 @@ public class QueryFacilityInformationParamsDto {
     @ApiModelProperty("操作系统名称")
     private String operatingSystem;
 
-    @ApiModelProperty("对象的状态,注意-1是操作失败")
+    @ApiModelProperty("对象的状态")
     private Integer status;
 }

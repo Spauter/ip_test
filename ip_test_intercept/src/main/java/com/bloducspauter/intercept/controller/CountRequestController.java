@@ -77,6 +77,4 @@ public class CountRequestController {
         int count = facilityInformationService.getForbiddenEntitiesCount();
         return new ResultDto(HttpStatus.OK.value(), "查询成功", count);
     }
-
-
 }

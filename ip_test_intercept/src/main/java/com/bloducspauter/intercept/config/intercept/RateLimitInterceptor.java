@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +32,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
     // 同一时间段内允许的最大请求数
-    private static  int MAX_REQUESTS = 1000;
+    private static int MAX_REQUESTS = 200;
     // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
     private static final long TIME_PERIOD = 5 * 1000;
 
@@ -39,7 +40,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private String protectedAddress="http://localhost:11451";
+    private String protectedAddress = "";
 
     @Resource
     private FacilityInformationService requestEntityService;
@@ -48,20 +49,22 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private FacilityInformationCurrentRequestService facilityInformationService;
 
     @Resource
-    private RedisTemplate<String,Object>redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
+
     /**
      * 这个方法将在请求处理之前进行调用。注意：如果该方法的返回值为false ，
      * 将视为当前请求结束，不仅自身的拦截器会失效，还会导致其他的拦截器也不再执行。
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String origin=request.getParameter("diy_name");
+        String origin = request.getParameter("diy_name");
         if ("Bloduc Spauter".equalsIgnoreCase(origin)) {
             return true;
         }
-        if (!request.getRequestURL().toString().startsWith(protectedAddress)) {
-            return true;
-        }
+//        String a=request.getRequestURL().toString();
+//        if (!(a.startsWith(protectedAddress)||a.equalsIgnoreCase(protectedAddress))) {
+//            return true;
+//        }
         GetIpUtil getIpUtil = new GetIpUtil();
         String ipAddress = getIpUtil.getIpAddress(request);
         String userAgent = request.getHeader("User-Agent");
@@ -89,25 +92,22 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return true;
     }
 
-//    @PostMapping("commit_form")
+    //    @PostMapping("commit_form")
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
         String path = request.getServletPath();
         if (path.endsWith("max_allow")) {
             maxAllow();
-        }else if (path.endsWith("commit_form")) {
-
-        }else {
-            return;
+        } else if (path.endsWith("commit_form")) {
+            protect();
         }
-
     }
 
-    public void maxAllow(){
-        Object max=redisTemplate.opsForValue().get("max_allow");
+    public void maxAllow() {
+        Object max = redisTemplate.opsForValue().get("max_allow");
         log.info("Updating MAX_REQUESTS");
         if (max == null) {
-            log.warn("No data,using default value {}",1000);
+            log.warn("No data,using default value {}", 1000);
             return;
         }
         try {
@@ -115,18 +115,19 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             MAX_REQUESTS = Integer.parseInt(maxAllow);
             log.info("updating finished: {}", maxAllow);
         } catch (Exception e) {
-            log.error("Updating failed because of {},{}",e.getClass().getSimpleName(),e.getMessage());
-            log.warn("No data,using default value {}",1000);
+            log.error("Updating failed because of {},{}", e.getClass().getSimpleName(), e.getMessage());
+            log.warn("No data,using default value {}", 1000);
         }
     }
 
-    public void protect(){
-        Object webAddress=redisTemplate.opsForValue().get("webAddress");
+    public void protect() {
+        Object webAddress = redisTemplate.opsForValue().get("webAddress");
         if (webAddress == null) {
             log.warn("No website address");
             return;
         }
-        protectedAddress= webAddress.toString();
+        log.info("web address {}",webAddress.toString());
+        protectedAddress = webAddress.toString();
     }
 
     /**

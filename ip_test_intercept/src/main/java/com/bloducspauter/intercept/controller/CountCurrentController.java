@@ -11,11 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -91,11 +89,17 @@ public class CountCurrentController {
         return new ResultDto(HttpStatus.OK.value(), "操作成功", maximum);
     }
 
-    @PostMapping("commit_form")
-    public ResultDto addProtection(HttpServletRequest request) {
-        String webAddress = request.getParameter("webAddress");
-        String apiKey = request.getParameter("apiKey");
-        String password=request.getParameter("password");
+    /**
+     * 这是组长要求输入被保护网址。。。
+     * 其实真正需要的是一个服务名，网址会不断变动，比如网关转发或者{@code nginx}反向代理转发都会指向一个新网址
+     * 这里无论提供什么网址结果都一样，不会影响{@code RateLimitInterceptor}的工作
+     *
+     * @param webAddress 网址
+     * @return 就当作返回了一个 Hello world
+     */
+    @GetMapping("commit_form")
+    @ApiOperation("测试网站")
+    public ResultDto addProtection(String webAddress) {
         redisTemplate.opsForValue().set("webAddress", webAddress);
         return new ResultDto(200,"操作成功",webAddress);
     }

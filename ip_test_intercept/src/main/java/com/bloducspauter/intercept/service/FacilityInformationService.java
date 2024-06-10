@@ -65,8 +65,14 @@ public interface FacilityInformationService {
      */
     int isBanAnIp(Integer id, Integer status);
 
+    /**
+     * 获取具体被手动封禁的ip
+     */
     List<Object>getForbiddenEntities();
 
+    /**
+     * 获取被手动封禁的IP数量
+     */
     int getForbiddenEntitiesCount();
 
 }

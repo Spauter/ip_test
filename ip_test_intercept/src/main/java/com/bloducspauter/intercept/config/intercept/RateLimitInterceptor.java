@@ -17,7 +17,10 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 通过拦截器处理{@code HttpServletRequest}里面的请求IP,IP Address,请求的地址进行处理
@@ -33,7 +36,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
 
-    private static int MAX_REQUESTS = 20;
+    private static int MAX_REQUESTS = 30;
 
     private static final long TIME_PERIOD = 60 * 1000;
 
@@ -72,12 +75,12 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             countAfterIntercept(id, ipAddress, userAgentObj);
             isNew = false;
             return true;
-        } else if (requestCounts.get(ipAddress) >= MAX_REQUESTS && requestCounts.get(ipAddress) < MAX_REQUESTS+5) {
+        } else if (requestCounts.get(ipAddress) == MAX_REQUESTS ) {
             RequestDispatcher dispatcher = request.getRequestDispatcher("/verify.html?diy_name=Bloduc+Spauter");
             //执行转发
             dispatcher.forward(request, response);
-            //存入并发哈希表
-            remove(ipAddress);
+//            存入并发哈希表
+            remove(id,ipAddress,userAgentObj);
             //打印信息
             log.info("Id:{}, Ip Address:{}, Browser:{} ,Operating_system:{} has many requests",
                     id, ipAddress, userAgentObj.getBrowser().getName(), userAgentObj.getOperatingSystem().getName());
@@ -142,22 +145,23 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         scheduler.schedule(() -> {
             try {
                 count(id, address, userAgentObj);
+                isNew=true;
             } catch (Exception e) {
                 log.error(e.getLocalizedMessage());
             }
-        }, 5 * 1000, TimeUnit.MILLISECONDS);
+        }, 5*1000, TimeUnit.MILLISECONDS);
     }
 
     /**
      * 从{@code requestCounts}移除
-     * @param address IP地址
      */
-    private void remove(String address) {
+    private void remove(int id,String ipAddress,UserAgent userAgentObj) {
         scheduler.schedule(() -> {
             //Map中移除
-            requestCounts.remove(address);
-            log.info("address {} can request again", address);
-            isNew = true;
+            count(id, ipAddress, userAgentObj);
+            requestCounts.remove(ipAddress);
+            log.info("address {} can request again", ipAddress);
+            isNew=true;
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);
     }
 
@@ -169,6 +173,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
      */
     private void count(Integer id, String address, UserAgent userAgentObj) {
         try {
+            if (!requestCounts.containsKey(address)) {
+                return;
+            }
             int totalRequests = requestCounts.get(address);
             int rejectedRequest = Math.max(totalRequests - MAX_REQUESTS, 0);
             String browser = userAgentObj.getBrowser().getName();
@@ -180,6 +187,4 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             e.printStackTrace();
         }
     }
-
-
 }

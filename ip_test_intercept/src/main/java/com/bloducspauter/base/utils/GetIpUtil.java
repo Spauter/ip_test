@@ -1,7 +1,6 @@
 package com.bloducspauter.base.utils;
 
 import eu.bitwalker.useragentutils.UserAgent;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
 

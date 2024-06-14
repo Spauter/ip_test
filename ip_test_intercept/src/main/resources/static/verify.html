@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reCAPTCHA</title>
+    <!-- 引入 layui.css -->
+    <link href="//unpkg.com/layui@2.9.11/dist/css/layui.css" rel="stylesheet">
+    <!-- 引入 layui.js -->
+    <script src="//unpkg.com/layui@2.9.11/dist/layui.js"></script>
+    <script src="https://www.recaptcha.net/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/js/common.js?diy_name=Bloduc+Spauter"></script>
+    <script src="/js/verify.js?diy_name=Bloduc+Spauter"></script>
+</head>
+<body>
+<div class="layui-btn-container">
+    <button class="layui-btn" lay-on="test-page-custom">点击测试</button>
+</div>
+</body>
+</html>

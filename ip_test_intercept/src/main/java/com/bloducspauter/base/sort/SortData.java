@@ -1,6 +1,5 @@
 package com.bloducspauter.base.sort;
 
-import com.bloducspauter.base.enums.SortWay;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

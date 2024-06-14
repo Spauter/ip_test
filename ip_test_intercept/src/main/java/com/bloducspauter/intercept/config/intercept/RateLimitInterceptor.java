@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.annotation.Resource;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -31,16 +32,14 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private boolean isNew = true;
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitInterceptor.class);
-    // 同一时间段内允许的最大请求数
-    private static int MAX_REQUESTS = 200;
-    // 时间段，单位为毫秒 在一分钟内限制ip访问次数为20次
-    private static final long TIME_PERIOD = 5 * 1000;
+
+    private static int MAX_REQUESTS = 20;
+
+    private static final long TIME_PERIOD = 60 * 1000;
 
     private final Map<String, Integer> requestCounts = new ConcurrentSkipListMap<>();
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-    private String protectedAddress = "";
 
     @Resource
     private FacilityInformationService requestEntityService;
@@ -61,10 +60,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         if ("Bloduc Spauter".equalsIgnoreCase(origin)) {
             return true;
         }
-//        String a=request.getRequestURL().toString();
-//        if (!(a.startsWith(protectedAddress)||a.equalsIgnoreCase(protectedAddress))) {
-//            return true;
-//        }
         GetIpUtil getIpUtil = new GetIpUtil();
         String ipAddress = getIpUtil.getIpAddress(request);
         String userAgent = request.getHeader("User-Agent");
@@ -77,10 +72,16 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             countAfterIntercept(id, ipAddress, userAgentObj);
             isNew = false;
             return true;
-        } else if (requestCounts.get(ipAddress) == MAX_REQUESTS) {
+        } else if (requestCounts.get(ipAddress) >= MAX_REQUESTS && requestCounts.get(ipAddress) < MAX_REQUESTS+5) {
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/verify.html?diy_name=Bloduc+Spauter");
+            //执行转发
+            dispatcher.forward(request, response);
+            //存入并发哈希表
+            remove(ipAddress);
             //打印信息
             log.info("Id:{}, Ip Address:{}, Browser:{} ,Operating_system:{} has many requests",
                     id, ipAddress, userAgentObj.getBrowser().getName(), userAgentObj.getOperatingSystem().getName());
+            return false;
         }
         // 检查 IP 地址是否已经达到最大请求数
         else if (requestCounts.get(ipAddress) > MAX_REQUESTS) {
@@ -92,7 +93,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    //    @PostMapping("commit_form")
+
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
         String path = request.getServletPath();
@@ -126,8 +127,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             log.warn("No website address");
             return;
         }
-        log.info("web address {}",webAddress.toString());
-        protectedAddress = webAddress.toString();
+        log.info("web address {}", webAddress);
     }
 
     /**
@@ -140,21 +140,46 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private void countAfterIntercept(Integer id, String address, UserAgent userAgentObj) {
         // 在指定时间后清除 IP 地址的请求数
         scheduler.schedule(() -> {
-            int totalRequests = requestCounts.get(address);
             try {
-                int rejectedRequest = Math.max(totalRequests - MAX_REQUESTS, 0);
-                String browser = userAgentObj.getBrowser().getName();
-                String operatingSystem = userAgentObj.getOperatingSystem().getName();
-                FacilityInformation requestFacilityInformation = new FacilityInformation(id, operatingSystem, browser, totalRequests, rejectedRequest, address, 0);
-                requestEntityService.insert(requestFacilityInformation);
-                facilityInformationService.addFacilityInformation(requestFacilityInformation);
+                count(id, address, userAgentObj);
             } catch (Exception e) {
                 log.error(e.getLocalizedMessage());
             }
+        }, 5 * 1000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 从{@code requestCounts}移除
+     * @param address IP地址
+     */
+    private void remove(String address) {
+        scheduler.schedule(() -> {
             //Map中移除
             requestCounts.remove(address);
-            isNew = true;
             log.info("address {} can request again", address);
+            isNew = true;
         }, TIME_PERIOD, TimeUnit.MILLISECONDS);
     }
+
+    /**
+     * 统计访问次数
+     * @param id 设备id
+     * @param address IP地址
+     * @param userAgentObj {@code UserAgent}
+     */
+    private void count(Integer id, String address, UserAgent userAgentObj) {
+        try {
+            int totalRequests = requestCounts.get(address);
+            int rejectedRequest = Math.max(totalRequests - MAX_REQUESTS, 0);
+            String browser = userAgentObj.getBrowser().getName();
+            String operatingSystem = userAgentObj.getOperatingSystem().getName();
+            FacilityInformation requestFacilityInformation = new FacilityInformation(id, operatingSystem, browser, totalRequests, rejectedRequest, address, 0);
+            requestEntityService.insert(requestFacilityInformation);
+            facilityInformationService.addFacilityInformation(requestFacilityInformation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

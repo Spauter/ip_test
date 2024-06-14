@@ -34,7 +34,6 @@ public class CountRequestController {
     @Resource
     FacilityInformationService facilityInformationService;
 
-
     @PostMapping("/forbid")
     @ApiOperation(value = "对或者IP进行封禁操作")
     public ResultDto forbidAnEntities(QueryFacilityInformationParamsDto params) {

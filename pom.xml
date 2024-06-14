@@ -8,7 +8,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>ip_test_intercept</module>
-        <module>ip_test_base</module>
         <module>ip_test_gateway</module>
     </modules>
     <dependencies>
